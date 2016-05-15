@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Recieved Credits"
+	{
+		"#format"		"{1:d}"
+		"en"			"You recieved {1} credits for having painlessgaming.eu!"
+	}
+}
