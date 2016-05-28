@@ -36,13 +36,8 @@ public void OnPluginStart()
 	g_cTag = CreateConVar("store_credits_name_tag", "painlessgaming.eu", "The tag the user should have in the name");
 	
 	AutoExecConfig(true);
-	
-	LoadTranslations("store_credits_name.phrases");
-}
-
-public void OnMapStart()
-{
 	CreateTimer(g_cTime.FloatValue, Timer_Callback, TIMER_REPEAT);
+	LoadTranslations("store_credits_name.phrases");
 }
 
 public Action Timer_Callback(Handle timer, any userid)
@@ -67,7 +62,7 @@ public void OnClientPutInServer(int client)
 	if(!GetClientName(client, name, sizeof(name)))
 		return;
 	
-	if(StrContains(name, buffer, false) != -1)
+	if(strcmp(name, buffer, false) != -1)
 		g_bHasTag[client] = true;
 }
 
