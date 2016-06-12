@@ -30,14 +30,20 @@ ConVar g_cTag;
 
 public void OnPluginStart()
 {	
-	g_cTime = CreateConVar("store_credits_name_time", "1.0", "After which should they recieve the credits");
+	g_cTime = CreateConVar("store_credits_name_time", "60.0", "After which should they recieve the credits");
 	g_cCredits = CreateConVar("store_credits_name_credits", "1", "How much credits should the recieve");
 	g_cMessage = CreateConVar("store_credits_name_messages", "1", "Display a message when a client recieves credits");
 	g_cTag = CreateConVar("store_credits_name_tag", "painlessgaming.eu", "The tag the user should have in the name");
 	
 	AutoExecConfig(true);
-	CreateTimer(g_cTime.FloatValue, Timer_Callback, _, TIMER_REPEAT);
+
 	LoadTranslations("store_credits_name.phrases");
+}
+
+public void OnMapStart()
+{
+	CreateTimer(g_cTime.FloatValue, Timer_Callback, _, TIMER_REPEAT);
+	PrintToServer("Intiating a Timer with %f repeat", g_cTime.FloatValue);
 }
 
 public Action Timer_Callback(Handle timer, any userid)
