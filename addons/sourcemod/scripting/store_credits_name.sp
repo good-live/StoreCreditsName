@@ -23,10 +23,14 @@ public Plugin myinfo =
 
 bool g_bHasTag[MAXPLAYERS + 1] =  { false, ... };
 
+Handle g_hTimer[MAXPLAYERS + 1] =  { INVALID_HANDLE, ... };
+
 ConVar g_cTime;
 ConVar g_cCredits;
 ConVar g_cMessage;
 ConVar g_cTag;
+
+Handle LogFile = INVALID_HANDLE;
 
 public void OnPluginStart()
 {	
@@ -35,41 +39,53 @@ public void OnPluginStart()
 	g_cMessage = CreateConVar("store_credits_name_messages", "1", "Display a message when a client recieves credits");
 	g_cTag = CreateConVar("store_credits_name_tag", "painlessgaming.eu", "The tag the user should have in the name");
 	
+	HookEvent("player_changename", Event_ChangeName);
+	
 	AutoExecConfig(true);
 
 	LoadTranslations("store_credits_name.phrases");
+	
+	char Path[526];
+	BuildPath(Path_SM, Path, sizeof(Path), "logs/store_name.txt");
+	LogFile = OpenFile(Path, "a");
 }
 
-public void OnMapStart()
+public void OnClientPostAdminCheck(int client)
 {
-	CreateTimer(g_cTime.FloatValue, Timer_Callback, _, TIMER_REPEAT);
-	PrintToServer("Intiating a Timer with %f repeat", g_cTime.FloatValue);
+	if(IsValidClient(client))
+	{
+		if(g_hTimer[client] != INVALID_HANDLE)
+			KillTimer(g_hTimer[client]);
+		
+		g_hTimer[client] = CreateTimer(g_cTime.FloatValue, Timer_Callback, GetClientUserId(client), TIMER_REPEAT);
+		
+		g_bHasTag[client] = false;
+		char buffer[128];
+		g_cTag.GetString(buffer, sizeof(buffer));
+		
+		char name[128];
+		if(!GetClientName(client, name, sizeof(name)))
+			return;
+		if(StrContains(name, buffer, true) != -1)
+			g_bHasTag[client] = true;
+	}
 }
 
 public Action Timer_Callback(Handle timer, any userid)
 {
-	for (int i = 1; i <= MaxClients; i++)
+	int client = GetClientOfUserId(userid);
+	if(!IsValidClient(client))
 	{
-		if(IsValidClient(i) && g_bHasTag[i])
-		{
-			Store_SetClientCredits(i, Store_GetClientCredits(i) + g_cCredits.IntValue);
-			if(g_cMessage.BoolValue)
-				CPrintToChat(i, "%T", "Recieved Credits", i, g_cCredits.IntValue);
-		}
+		if(g_hTimer[client] != INVALID_HANDLE)
+			KillTimer(g_hTimer[client], true);
 	}
-}
-
-public void OnClientPutInServer(int client)
-{
-	g_bHasTag[client] = false;
-	char buffer[128];
-	g_cTag.GetString(buffer, sizeof(buffer));
-	
-	char name[128];
-	if(!GetClientName(client, name, sizeof(name)))
-		return;
-	if(strcmp(name, buffer, false) != -1)
-		g_bHasTag[client] = true;
+	if(g_bHasTag[client])
+	{
+		Store_SetClientCredits(client, Store_GetClientCredits(client) + g_cCredits.IntValue);
+		if(g_cMessage.BoolValue)
+			CPrintToChat(client, "%T", "Recieved Credits", client, g_cCredits.IntValue);
+		LogToOpenFile(LogFile, "%N recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
+	}
 }
 
 public void OnClientDisconnect(int client)
@@ -83,4 +99,20 @@ public bool IsValidClient(int client)
 		return true;
 	
 	return false;
+}
+
+public Action Event_ChangeName(Handle event, const char[] name, bool dontBroadcast){
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	
+	if(!IsValidClient(client))
+		return;
+	
+	g_bHasTag[client] = false;
+	char buffer[128];
+	g_cTag.GetString(buffer, sizeof(buffer));
+	
+	char sName[128];
+	GetEventString(event, "newname", sName, sizeof(sName));
+	if(StrContains(sName, buffer, true) != -1)
+		g_bHasTag[client] = true;
 }
