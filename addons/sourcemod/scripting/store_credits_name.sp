@@ -30,8 +30,6 @@ ConVar g_cCredits;
 ConVar g_cMessage;
 ConVar g_cTag;
 
-Handle LogFile = INVALID_HANDLE;
-
 public void OnPluginStart()
 {	
 	g_cTime = CreateConVar("store_credits_name_time", "60.0", "After which should they recieve the credits");
@@ -44,10 +42,6 @@ public void OnPluginStart()
 	AutoExecConfig(true);
 
 	LoadTranslations("store_credits_name.phrases");
-	
-	char Path[526];
-	BuildPath(Path_SM, Path, sizeof(Path), "logs/store_name.txt");
-	LogFile = OpenFile(Path, "a");
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -84,7 +78,9 @@ public Action Timer_Callback(Handle timer, any userid)
 		Store_SetClientCredits(client, Store_GetClientCredits(client) + g_cCredits.IntValue);
 		if(g_cMessage.BoolValue)
 			CPrintToChat(client, "%T", "Recieved Credits", client, g_cCredits.IntValue);
-		LogToOpenFile(LogFile, "%N recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
+		char Path[526];
+		BuildPath(Path_SM, Path, sizeof(Path), "logs/store_name.txt");
+		LogToFile(Path, "%N recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
 	}
 }
 
