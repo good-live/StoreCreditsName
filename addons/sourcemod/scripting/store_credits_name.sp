@@ -91,7 +91,7 @@ public void OnClientDisconnect(int client)
 
 public bool IsValidClient(int client)
 {
-	if ((1 <= client <= MaxClients) || !IsClientInGame(client))
+	if (client <= 0 || client > MaxClients || !IsClientInGame(client))
 		return true;
 	
 	return false;
