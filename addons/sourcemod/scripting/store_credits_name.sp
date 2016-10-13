@@ -79,7 +79,7 @@ public Action Timer_Callback(Handle timer, any userid)
 			CPrintToChat(client, "%T", "Recieved Credits", client, g_cCredits.IntValue);
 		char Path[526];
 		BuildPath(Path_SM, Path, sizeof(Path), "logs/store_name.txt");
-		LogToFile(Path, "%N recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
+		LogToFile(Path, "%L recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
 	}
 	return Plugin_Continue;
 }
