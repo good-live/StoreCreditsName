@@ -1,6 +1,5 @@
 #pragma semicolon 1
 
-#define DEBUG
 
 #define PLUGIN_AUTHOR "good_live"
 #define PLUGIN_VERSION "1.00"
@@ -70,8 +69,8 @@ public Action Timer_Callback(Handle timer, any userid)
 	int client = GetClientOfUserId(userid);
 	if(!IsValidClient(client))
 	{
-		if(g_hTimer[client] != INVALID_HANDLE)
-			KillTimer(g_hTimer[client], true);
+		g_hTimer[client] = INVALID_HANDLE;
+		return Plugin_Stop;
 	}
 	if(g_bHasTag[client])
 	{
@@ -82,11 +81,17 @@ public Action Timer_Callback(Handle timer, any userid)
 		BuildPath(Path_SM, Path, sizeof(Path), "logs/store_name.txt");
 		LogToFile(Path, "%N recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
 	}
+	return Plugin_Continue;
 }
 
 public void OnClientDisconnect(int client)
 {
 	g_bHasTag[client] = false;
+	if(g_hTimer[client] != INVALID_HANDLE)
+	{
+		KillTimer(g_hTimer[client]);
+		g_hTimer[client] = INVALID_HANDLE;
+	}
 }
 
 public bool IsValidClient(int client)
