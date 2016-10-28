@@ -97,9 +97,9 @@ public void OnClientDisconnect(int client)
 public bool IsValidClient(int client)
 {
 	if (client <= 0 || client > MaxClients || !IsClientInGame(client))
-		return true;
+		return false;
 	
-	return false;
+	return true;
 }
 
 public Action Event_ChangeName(Handle event, const char[] name, bool dontBroadcast){
