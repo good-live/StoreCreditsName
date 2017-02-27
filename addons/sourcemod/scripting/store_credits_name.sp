@@ -2,7 +2,7 @@
 
 
 #define PLUGIN_AUTHOR "good_live"
-#define PLUGIN_VERSION "1.00"
+#define PLUGIN_VERSION "1.0.1"
 
 #include <sourcemod>
 #include <sdktools>
@@ -95,11 +95,8 @@ public void OnClientDisconnect(int client)
 }
 
 public bool IsValidClient(int client)
-{
-	if (client <= 0 || client > MaxClients || !IsClientInGame(client))
-		return false;
-	
-	return true;
+{	
+	return (0 < client <= MaxClients && IsClientInGame(client));
 }
 
 public Action Event_ChangeName(Handle event, const char[] name, bool dontBroadcast){
