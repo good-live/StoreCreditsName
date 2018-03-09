@@ -5,4 +5,9 @@
 		"#format"		"{1:d}"
 		"en"			"You recieved {1} credits for having painlessgaming.eu!"
 	}
+
+	"AD_MESSAGE"
+	{
+		"en"			"2x Credits/Minute mit painlessgaming.eu im Namen!"
+	}
 }
