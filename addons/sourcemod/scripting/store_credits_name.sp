@@ -2,7 +2,7 @@
 
 
 #define PLUGIN_AUTHOR "good_live"
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.0.2"
 
 #include <sourcemod>
 #include <sdktools>
@@ -23,11 +23,14 @@ public Plugin myinfo =
 bool g_bHasTag[MAXPLAYERS + 1] =  { false, ... };
 
 Handle g_hTimer[MAXPLAYERS + 1] =  { INVALID_HANDLE, ... };
+Handle g_hAdTimer = AdTimer;
 
 ConVar g_cTime;
 ConVar g_cCredits;
 ConVar g_cMessage;
 ConVar g_cTag;
+ConVar g_cAdvertise;
+ConVar g_cAdvertiseTime;
 
 public void OnPluginStart()
 {	
@@ -35,12 +38,21 @@ public void OnPluginStart()
 	g_cCredits = CreateConVar("store_credits_name_credits", "1", "How much credits should they recieve");
 	g_cMessage = CreateConVar("store_credits_name_messages", "1", "Display a message when a client recieves credits");
 	g_cTag = CreateConVar("store_credits_name_tag", "painlessgaming.eu", "The tag the user should have in the name");
+	g_cAdvertise = CreateConVar("store_credits_name_advertise", "1", "Advertise this plugin to new players.");
+	g_cAdvertiseTime = CreateConVar("store_credits_name_advertise_time", "900.0", "Time in secounds to show ad");
 	
 	HookEvent("player_changename", Event_ChangeName);
 	
 	AutoExecConfig(true);
 
 	LoadTranslations("store_credits_name.phrases");
+}
+
+public void OnMapStart()
+{
+	if(g_cAdvertise.BoolValue) {
+		g_hAdTimer = CreateTimer(g_cAdvertiseTime.FloatValue, Timer_Ad, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	}
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -82,6 +94,23 @@ public Action Timer_Callback(Handle timer, any userid)
 		LogToFile(Path, "%L recieved %d credits for having the tag in his name.", client, g_cCredits.IntValue);
 	}
 	return Plugin_Continue;
+}
+
+public Action Timer_Ad(Handle timer)
+{
+	for(int i = 1; i = MaxClients; i++)
+	{
+		if(IsValidClient(i) && !g_bHasTag[client]) {
+			ShowAd(i);
+		}
+	}
+}
+
+void ShowAd(int client)
+{
+	char sMessage[256];
+	Format(sMessage, sizeof(sMessage), "%T", client, "AD_MESSAGE");
+	HudMessage(i,  "18 173 42" , "99 255 32", "2", "5", sMessage, "-1.0",  "0.15", "0.2", "1", "6");
 }
 
 public void OnClientDisconnect(int client)
