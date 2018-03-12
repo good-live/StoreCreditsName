@@ -23,7 +23,6 @@ public Plugin myinfo =
 bool g_bHasTag[MAXPLAYERS + 1] =  { false, ... };
 
 Handle g_hTimer[MAXPLAYERS + 1] =  { INVALID_HANDLE, ... };
-Handle g_hAdTimer = AdTimer;
 
 ConVar g_cTime;
 ConVar g_cCredits;
@@ -51,7 +50,7 @@ public void OnPluginStart()
 public void OnMapStart()
 {
 	if(g_cAdvertise.BoolValue) {
-		g_hAdTimer = CreateTimer(g_cAdvertiseTime.FloatValue, Timer_Ad, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(g_cAdvertiseTime.FloatValue, Timer_Ad, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -98,9 +97,9 @@ public Action Timer_Callback(Handle timer, any userid)
 
 public Action Timer_Ad(Handle timer)
 {
-	for(int i = 1; i = MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsValidClient(i) && !g_bHasTag[client]) {
+		if(IsValidClient(i) && !g_bHasTag[i]) {
 			ShowAd(i);
 		}
 	}
@@ -110,7 +109,7 @@ void ShowAd(int client)
 {
 	char sMessage[256];
 	Format(sMessage, sizeof(sMessage), "%T", client, "AD_MESSAGE");
-	HudMessage(i,  "18 173 42" , "99 255 32", "2", "5", sMessage, "-1.0",  "0.15", "0.2", "1", "6");
+	HudMessage(client,  "18 173 42" , "99 255 32", "2", "5", sMessage, "-1.0",  "0.15", "0.2", "1", "6");
 }
 
 public void OnClientDisconnect(int client)
@@ -142,4 +141,28 @@ public Action Event_ChangeName(Handle event, const char[] name, bool dontBroadca
 	GetEventString(event, "newname", sName, sizeof(sName));
 	if(StrContains(sName, buffer, true) != -1)
 		g_bHasTag[client] = true;
+}
+
+stock void HudMessage(int client, const char[] color,const char[] color2, const char[] effect, const char[] channel, const char[] message, const char[] posx, const char[] posy, const char[] fadein, const char[] fadeout, const char[] holdtime)
+{
+  char szHoldTime[32];
+  Format(szHoldTime, sizeof(szHoldTime), "!self,Kill,,%s,-1", holdtime);
+  int iGameText = CreateEntityByName("game_text");
+  DispatchKeyValue(iGameText, "channel", channel);
+  DispatchKeyValue(iGameText, "color", color);
+  DispatchKeyValue(iGameText, "color2", color2);
+  DispatchKeyValue(iGameText, "effect", effect);
+  DispatchKeyValue(iGameText, "fadein", fadein);
+  DispatchKeyValue(iGameText, "fadeout", fadeout);
+  DispatchKeyValue(iGameText, "fxtime", "0.25");
+  DispatchKeyValue(iGameText, "holdtime", holdtime);
+  DispatchKeyValue(iGameText, "message", message);
+  DispatchKeyValue(iGameText, "spawnflags", "0");
+  DispatchKeyValue(iGameText, "x", posx);
+  DispatchKeyValue(iGameText, "y", posy);
+  DispatchSpawn(iGameText);
+  SetVariantString("!activator");
+  AcceptEntityInput(iGameText,"display",client);
+  DispatchKeyValue(iGameText, "OnUser1", szHoldTime);
+  AcceptEntityInput(iGameText, "FireUser1");
 }
