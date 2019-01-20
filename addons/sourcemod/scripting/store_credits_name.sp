@@ -108,7 +108,7 @@ public Action Timer_Ad(Handle timer)
 void ShowAd(int client)
 {
 	char sMessage[256];
-	Format(sMessage, sizeof(sMessage), "%T", client, "AD_MESSAGE");
+	Format(sMessage, sizeof(sMessage), "%T", "AD_MESSAGE", client);
 	HudMessage(client,  "18 173 42" , "99 255 32", "2", "5", sMessage, "-1.0",  "0.15", "0.2", "1", "6");
 }
 
